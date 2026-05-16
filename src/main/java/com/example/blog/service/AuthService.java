@@ -45,6 +45,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(AuthRegisterRequest request) {
+        // Registration owns both the login record and the public profile so new users can publish immediately.
         if (userRepository.existsByEmail(request.email())) {
             throw new BadRequestException("Email is already registered");
         }
@@ -71,6 +72,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponse login(AuthLoginRequest request) {
+        // Let Spring Security verify the password before we return a JWT to the client.
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.identifier(), request.password())
         );
@@ -92,6 +94,7 @@ public class AuthService {
     }
 
     private CurrentUserResponse toCurrentUser(User user, Profile profile) {
+        // The frontend uses this small shape for navigation, guards, and profile labels.
         return new CurrentUserResponse(
                 user.getId(),
                 user.getUsername(),

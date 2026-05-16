@@ -33,16 +33,19 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        // The API is stateless: every protected request must bring a valid JWT in the Authorization header.
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Public read routes keep the blog browsable without forcing visitors to sign in.
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/profiles/me/**", "/api/dashboard/**", "/api/posts/bookmarks").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/*", "/api/tags/**", "/api/profiles/*", "/api/resume/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/posts/*/comments").permitAll()
+                        // Admin endpoints require the ADMIN role stored on the authenticated user.
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

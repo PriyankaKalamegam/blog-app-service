@@ -18,6 +18,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(NotFoundException ex) {
+        // Keep all API errors in one JSON shape so the frontend can display messages consistently.
         ApiErrorResponse error = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
@@ -67,6 +68,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationError(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
+        // Bean Validation errors include field-level details for form-specific UI feedback.
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }

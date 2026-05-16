@@ -34,11 +34,13 @@ public class DashboardService {
         Long userId = currentUserService.requireCurrentUser().getId();
         List<Post> myPosts = postRepository.findByAuthorIdOrderByUpdatedAtDesc(userId);
 
+        // Dashboard metrics are derived from the author's posts so they always reflect current content.
         long totalPosts = myPosts.size();
         long totalViews = myPosts.stream().mapToLong(post -> post.getViewCount() == null ? 0 : post.getViewCount()).sum();
         long totalLikes = myPosts.stream().mapToLong(post -> postLikeRepository.countByPostId(post.getId())).sum();
         long drafts = myPosts.stream().filter(post -> post.getStatus() == PostStatus.DRAFT).count();
 
+        // Recent activity is intentionally lightweight; the UI only needs a label and timestamp.
         List<ActivityItemResponse> activity = myPosts.stream()
                 .limit(10)
                 .map(post -> new ActivityItemResponse(

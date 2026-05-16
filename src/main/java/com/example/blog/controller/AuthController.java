@@ -36,6 +36,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public CurrentUserResponse me() {
+        // Used by the UI on refresh to restore the logged-in user's session from the stored JWT.
         return authService.me();
     }
 }

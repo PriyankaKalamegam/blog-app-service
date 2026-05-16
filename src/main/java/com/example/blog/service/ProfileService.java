@@ -65,6 +65,7 @@ public class ProfileService {
         User user = currentUserService.requireCurrentUser();
         Profile profile = getProfileByUserId(user.getId());
 
+        // Only fields present in the request are changed, which lets the UI submit partial profile edits.
         if (request.getDisplayName() != null) {
             profile.setDisplayName(request.getDisplayName().trim());
         }
@@ -98,6 +99,7 @@ public class ProfileService {
     public ProjectResponse createProject(ProjectUpsertRequest request) {
         Profile profile = getProfileByUserId(currentUserService.requireCurrentUser().getId());
 
+        // Projects belong to profiles, not directly to users, so portfolio data stays grouped together.
         Project project = new Project();
         project.setProfile(profile);
         applyProject(request, project);
@@ -113,6 +115,7 @@ public class ProfileService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NotFoundException("Project not found: " + projectId));
 
+        // Return 404 for another user's project to avoid leaking ownership information.
         if (!project.getProfile().getId().equals(profile.getId())) {
             throw new NotFoundException("Project not found: " + projectId);
         }
@@ -140,6 +143,7 @@ public class ProfileService {
     public ResumeResponse upsertResume(ResumeUpsertRequest request) {
         Profile profile = getProfileByUserId(currentUserService.requireCurrentUser().getId());
 
+        // Resume is one-per-profile; update the existing row or create it on first save.
         Resume resume = resumeRepository.findByProfileId(profile.getId()).orElseGet(Resume::new);
         resume.setProfile(profile);
         resume.setFileName(request.getFileName().trim());
@@ -171,6 +175,7 @@ public class ProfileService {
             return new ToggleResponse(targetUser.getId(), false, "Cannot follow yourself");
         }
 
+        // Follow behaves like a toggle so the frontend can use one button for follow/unfollow.
         boolean exists = followRepository.existsByFollowerIdAndFollowingId(currentUser.getId(), targetUser.getId());
         if (exists) {
             Follow existingFollow = followRepository.findByFollowerIdAndFollowingId(currentUser.getId(), targetUser.getId())
@@ -188,6 +193,7 @@ public class ProfileService {
     }
 
     private void applyProject(ProjectUpsertRequest request, Project project) {
+        // Keep project mapping in one helper so create and update stay behaviorally identical.
         project.setName(request.getName().trim());
         project.setDescription(request.getDescription() != null ? request.getDescription().trim() : null);
         project.setRepositoryUrl(request.getRepositoryUrl() != null ? request.getRepositoryUrl().trim() : null);
@@ -202,6 +208,7 @@ public class ProfileService {
     }
 
     private ProfileResponse toProfileResponse(Profile profile) {
+        // Aggregate counts and child collections into the public profile view consumed by React.
         long followerCount = followRepository.countByFollowingId(profile.getUser().getId());
         long followingCount = followRepository.countByFollowerId(profile.getUser().getId());
 

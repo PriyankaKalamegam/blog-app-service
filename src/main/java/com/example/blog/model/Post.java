@@ -45,6 +45,7 @@ public class Post {
     @Column(length = 360)
     private String excerpt;
 
+    // Content stores markdown, including fenced code blocks rendered by the React article view.
     @Lob
     @Column(nullable = false)
     private String content;
@@ -86,6 +87,7 @@ public class Post {
 
     @PrePersist
     void onCreate() {
+        // Posts default to zero views so list/detail responses never need null checks for fresh content.
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;

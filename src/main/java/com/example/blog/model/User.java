@@ -48,6 +48,7 @@ public class User {
     @OneToOne(mappedBy = "user")
     private Profile profile;
 
+    // These relationships let JPA navigate from an account to authored content and social actions.
     @OneToMany(mappedBy = "author")
     private Set<Post> posts = new HashSet<>();
 
@@ -78,6 +79,7 @@ public class User {
 
     @PrePersist
     void onCreate() {
+        // Audit timestamps are filled by the entity so service code does not repeat this bookkeeping.
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;

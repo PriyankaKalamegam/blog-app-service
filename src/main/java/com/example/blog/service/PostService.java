@@ -62,6 +62,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<PostSummaryResponse> getAllPosts(String search, String tag) {
+        // Feed queries only expose published posts; drafts remain visible only to owners/admins by id.
         List<Post> posts = (search == null || search.isBlank())
                 ? postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED)
                 : postRepository.searchPublishedByTerm(PostStatus.PUBLISHED, search.trim());
@@ -83,6 +84,7 @@ public class PostService {
     public PostDetailResponse getPostById(Long postId) {
         User currentUser = currentUserService.getCurrentUserOptional().orElse(null);
         Post post = findReadablePost(postId, currentUser);
+        // Counting views here keeps the API simple: every successful detail read increments once.
         post.setViewCount(post.getViewCount() + 1);
 
         return toPostDetailResponse(postRepository.save(post), currentUser);
@@ -92,6 +94,7 @@ public class PostService {
     public PostDetailResponse createPost(CreatePostRequest request) {
         User currentUser = currentUserService.requireCurrentUser();
 
+        // Slug, excerpt, and tags are normalized before persistence so the UI can stay lightweight.
         Post post = new Post();
         post.setAuthor(currentUser);
         post.setTitle(request.getTitle().trim());
@@ -238,6 +241,7 @@ public class PostService {
         if (post.getStatus() == PostStatus.PUBLISHED) {
             return post;
         }
+        // Drafts are hidden as "not found" unless the requester can manage that post.
         if (currentUser == null) {
             throw new NotFoundException("Post not found: " + postId);
         }
@@ -264,6 +268,7 @@ public class PostService {
             return new HashSet<>();
         }
 
+        // Tags are stored lowercase and reused by name to avoid duplicates like Java/java.
         return tagNames.stream()
                 .map(this::normalizeTag)
                 .filter(name -> !name.isBlank())
@@ -290,6 +295,7 @@ public class PostService {
 
         String candidate = normalized;
         int suffix = 2;
+        // Add numeric suffixes until the slug is unique, while allowing updates to keep their current slug.
         while (true) {
             Post sameSlugPost = postRepository.findBySlug(candidate).orElse(null);
             if (sameSlugPost == null) {
@@ -343,6 +349,7 @@ public class PostService {
         boolean liked = currentUser != null && postLikeRepository.existsByPostIdAndUserId(post.getId(), currentUser.getId());
         boolean bookmarked = currentUser != null && bookmarkRepository.existsByPostIdAndUserId(post.getId(), currentUser.getId());
 
+        // Detail responses include comments; summaries only include counts to keep feed payloads smaller.
         List<CommentResponse> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(post.getId())
                 .stream()
                 .sorted(Comparator.comparing(Comment::getCreatedAt))

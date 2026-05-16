@@ -47,6 +47,7 @@ public class ProfileController {
 
     @PostMapping("/profiles/{username}/follow")
     public ToggleResponse toggleFollow(@PathVariable String username) {
+        // Toggle endpoints return the new state so the frontend can update one button immediately.
         return profileService.toggleFollow(username);
     }
 
@@ -69,6 +70,7 @@ public class ProfileController {
 
     @PutMapping("/profiles/me/resume")
     public ResumeResponse upsertResume(@Valid @RequestBody ResumeUpsertRequest request) {
+        // PUT is used because the resume resource is replaced or created as one profile-owned document.
         return profileService.upsertResume(request);
     }
 

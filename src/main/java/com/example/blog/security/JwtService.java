@@ -32,6 +32,7 @@ public class JwtService {
     public String generateToken(User user) {
         Instant now = Instant.now();
 
+        // Keep the token compact but include the user id and role so the UI can hydrate session state quickly.
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claims(Map.of(
@@ -63,6 +64,7 @@ public class JwtService {
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {
+        // All token reads go through the same verified parser so expired or tampered tokens fail consistently.
         Claims claims = Jwts.parser()
                 .verifyWith(signingKey)
                 .build()

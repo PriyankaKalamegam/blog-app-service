@@ -26,6 +26,7 @@ public class CurrentUserService {
             return Optional.empty();
         }
 
+        // Support the custom JWT principal plus Spring's default principal shapes for easier testing.
         Object principal = authentication.getPrincipal();
         if (principal instanceof AppUserPrincipal appUserPrincipal) {
             Long userId = appUserPrincipal.getUser().getId();
@@ -42,6 +43,7 @@ public class CurrentUserService {
     }
 
     public User requireCurrentUser() {
+        // Use this helper when a service method cannot safely run for anonymous visitors.
         return getCurrentUserOptional().orElseThrow(() -> new UnauthorizedException("Authentication required"));
     }
 }

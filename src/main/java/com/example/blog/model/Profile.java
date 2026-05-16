@@ -52,6 +52,7 @@ public class Profile {
     @Column(length = 120)
     private String location;
 
+    // Skills are simple labels, so an element collection avoids a separate skill entity.
     @ElementCollection
     @CollectionTable(name = "profile_skills", joinColumns = @JoinColumn(name = "profile_id"))
     @Column(name = "skill", length = 80, nullable = false)
@@ -74,6 +75,7 @@ public class Profile {
 
     @PrePersist
     void onCreate() {
+        // Profiles share the same timestamp convention as users and posts.
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;

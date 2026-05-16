@@ -30,6 +30,7 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public AdminOverviewResponse getOverview() {
+        // Admin overview is a compact health snapshot for moderation and platform monitoring.
         return new AdminOverviewResponse(
                 userRepository.count(),
                 postRepository.count(),
