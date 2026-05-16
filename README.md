@@ -8,12 +8,12 @@ Spring Boot backend for a developer blogging platform.
 - Spring Data JPA
 - Spring Security + JWT
 - Flyway
-- PostgreSQL
+- H2 in-memory database for local development
 
 ## Run Backend
 
 From:
-`/Users/priyankakalamegam/Project/blog-app/service`
+`/Users/priyankakalamegam/Project/blog-app/service/blog-app-service`
 
 Build:
 ```bash
@@ -25,10 +25,21 @@ Run:
 java -jar build/libs/blog-app-service-0.0.1-SNAPSHOT.jar --server.port=8081
 ```
 
+## Demo Login Details
+
+- Admin: `admin` / `Admin@123`
+- User: `priyanka` / `Priyanka@123`
+
+## Local Database
+
+The default local profile uses H2 in memory:
+
+- JDBC URL: `jdbc:h2:mem:blogdb`
+- Username: `sa`
+- Password: empty
+- Console: `http://localhost:8081/h2-console`
+
 ## Environment Variables
-- `DB_URL` (default: `jdbc:postgresql://localhost:5432/blog_platform`)
-- `DB_USERNAME` (default: `postgres`)
-- `DB_PASSWORD` (default: `postgres`)
 - `JWT_SECRET` (default placeholder, set secure value in production)
 - `JWT_EXPIRATION_SECONDS` (default: `86400`)
 

@@ -78,6 +78,11 @@ public class PostController {
         return postService.incrementLike(postId);
     }
 
+    @PostMapping("/{postId}/likes")
+    public LikeResponse toggleLike(@PathVariable Long postId) {
+        return postService.incrementLike(postId);
+    }
+
     @PostMapping("/{postId}/bookmark")
     public ToggleResponse toggleBookmark(@PathVariable Long postId) {
         return postService.toggleBookmark(postId);

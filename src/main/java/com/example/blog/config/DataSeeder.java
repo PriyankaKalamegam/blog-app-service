@@ -52,6 +52,7 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        // The app uses an in-memory H2 database locally, so this seed data is recreated on each fresh run.
         if (userRepository.count() > 0) {
             return;
         }
@@ -97,7 +98,25 @@ public class DataSeeder implements CommandLineRunner {
         post1.setTitle("From Monolith to Developer Platform");
         post1.setSlug("from-monolith-to-developer-platform");
         post1.setExcerpt("A practical migration path from a simple demo app to a production-style developer blog platform.");
-        post1.setContent("## Migration Notes\n\nWe started by separating auth, profile, and content domains while keeping existing API routes stable.");
+        post1.setContent("""
+                ## Migration Notes
+
+                We started by separating auth, profile, and content domains while keeping existing API routes stable.
+
+                ```java
+                @RestController
+                @RequestMapping("/api/posts")
+                class PostController {
+                    @PostMapping("/{postId}/comments")
+                    ResponseEntity<CommentResponse> addComment(@PathVariable Long postId,
+                            @Valid @RequestBody CreateCommentRequest request) {
+                        return ResponseEntity.status(HttpStatus.CREATED).body(postService.addComment(postId, request));
+                    }
+                }
+                ```
+
+                The main rule was to keep controllers thin and move business decisions into services.
+                """);
         post1.setStatus(PostStatus.PUBLISHED);
         post1.setPublishedAt(LocalDateTime.now().minusDays(2));
         post1.setViewCount(128);
@@ -109,7 +128,24 @@ public class DataSeeder implements CommandLineRunner {
         post2.setTitle("React UI Refresh for Technical Writing");
         post2.setSlug("react-ui-refresh-for-technical-writing");
         post2.setExcerpt("Designing a cleaner writing and reading experience with reusable React modules.");
-        post2.setContent("## Frontend Revamp\n\nWe split the app into routes, reusable components, and service adapters.");
+        post2.setContent("""
+                ## Frontend Revamp
+
+                We split the app into routes, reusable components, and service adapters.
+
+                ```jsx
+                const onLike = async () => {
+                  const result = await platformApi.toggleLike(postId);
+                  setPost((prev) => ({
+                    ...prev,
+                    likeCount: result.likeCount,
+                    likedByCurrentUser: result.likedByCurrentUser
+                  }));
+                };
+                ```
+
+                Keeping API calls in one adapter makes page components easier to test and maintain.
+                """);
         post2.setStatus(PostStatus.PUBLISHED);
         post2.setPublishedAt(LocalDateTime.now().minusDays(1));
         post2.setViewCount(94);

@@ -155,6 +155,7 @@ public class PostService {
         User currentUser = currentUserService.getCurrentUserOptional().orElse(null);
         Post post = findReadablePost(postId, currentUser);
 
+        // Comments are intentionally open to guests; logged-in users are linked to their account automatically.
         Comment comment = new Comment();
         comment.setPost(post);
         comment.setAuthor(currentUser);
@@ -170,6 +171,7 @@ public class PostService {
         User currentUser = currentUserService.requireCurrentUser();
         Post post = findReadablePost(postId, currentUser);
 
+        // A user can like a post once. Calling the endpoint again toggles the existing like off.
         boolean exists = postLikeRepository.existsByPostIdAndUserId(post.getId(), currentUser.getId());
         if (exists) {
             PostLike like = postLikeRepository.findByPostIdAndUserId(post.getId(), currentUser.getId())
