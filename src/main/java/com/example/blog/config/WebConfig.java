@@ -1,5 +1,6 @@
 package com.example.blog.config;
 
+import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -10,8 +11,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final String[] allowedOrigins;
 
-    public WebConfig(@Value("${app.cors.allowed-origins}") String allowedOrigins) {
-        this.allowedOrigins = allowedOrigins.split(",");
+    public WebConfig(@Value("${app.cors.allowed-origins}") String configuredAllowedOrigins) {
+        this.allowedOrigins = Arrays.stream((configuredAllowedOrigins
+                        + ",https://projdevlogplatform.vercel.app").split(","))
+                .map(String::trim)
+                .distinct()
+                .toArray(String[]::new);
     }
 
     @Override
