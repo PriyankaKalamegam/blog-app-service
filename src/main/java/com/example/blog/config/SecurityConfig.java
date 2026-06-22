@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Public read routes keep the blog browsable without forcing visitors to sign in.
-                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/", "/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/profiles/me/**", "/api/dashboard/**", "/api/posts/bookmarks").authenticated()
